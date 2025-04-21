@@ -16,13 +16,13 @@ public class TaskController {
         this.taskRepo = taskRepo;
     }
 
-    @PostMapping
-    public Task addTask(@RequestBody Task task) {
-        return taskRepo.save(task);
-    }
-
     @GetMapping
     public List<Task> getAllTasks() {
         return taskRepo.findAll();
+    }
+
+    @PostMapping
+    public Task addTask(@RequestBody Task task) {
+        return taskRepo.save(task);
     }
 }
