@@ -1,8 +1,6 @@
 package com.example.rasirom.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -20,18 +18,23 @@ public class Responsabil {
 
     @Column(nullable = false, unique = true)
     private String email;
+
     @OneToMany(mappedBy = "responsabil", cascade = CascadeType.ALL)
+    @JsonManagedReference  // Evită loop-ul la serializare
     private List<Task> taskuri = new ArrayList<>();
 
-    public Long getId() {
-        return id;
-    }
+    // Constructori, Getters & Setters
 
-    public Responsabil(){}
+    public Responsabil() {}
+
     public Responsabil(String nume, String email, List<Task> taskuri) {
         this.nume = nume;
         this.email = email;
         this.taskuri = taskuri;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getNume() {

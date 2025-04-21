@@ -1,5 +1,8 @@
 package com.example.rasirom.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -23,18 +26,22 @@ public class Task {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responsabil_id", nullable = false)
+    @JsonBackReference  // Evită serializarea recursivă a responsabilului
     private Responsabil responsabil;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonIgnore  // Evită serializarea recursivă a părinților taskurilor
     private Task parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @JsonManagedReference  // Evită loop-ul la serializare pentru subtasks
     private List<Task> subtasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference  // Evită loop-ul la serializare pentru comments
     private List<Comment> comments = new ArrayList<>();
-
+    // Constructori, Getters & Setters
 
     public Task() {}
 
@@ -46,6 +53,7 @@ public class Task {
         this.parent = parent;
     }
 
+    // Getters & Setters
     public Long getId() {
         return id;
     }

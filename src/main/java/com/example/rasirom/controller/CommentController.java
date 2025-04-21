@@ -6,7 +6,9 @@ import com.example.rasirom.model.Responsabil;
 import com.example.rasirom.repository.CommentRepository;
 import com.example.rasirom.repository.TaskRepository;
 import com.example.rasirom.repository.ResponsabilRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -26,12 +28,12 @@ public class CommentController {
     }
 
     @PostMapping
-    public String addComment(@RequestBody Comment comment) {
+    public Comment addComment(@RequestBody Comment comment) {
         Optional<Task> taskOpt = taskRepo.findById(comment.getTask().getId());
         Optional<Responsabil> respOpt = responsabilRepo.findById(comment.getResponsabil().getId());
 
         if (taskOpt.isEmpty() || respOpt.isEmpty()) {
-            return "Task sau Responsabil inexistent!";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task sau Responsabil inexistent!");
         }
 
         Task task = taskOpt.get();
@@ -39,15 +41,14 @@ public class CommentController {
 
         // Restricție: comment-ul poate fi adăugat doar de responsabilul actual
         if (!task.getResponsabil().getId().equals(responsabil.getId())) {
-            return "Doar responsabilul asignat poate comenta!";
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Doar responsabilul asignat poate comenta!");
         }
 
         comment.setTask(task);
         comment.setResponsabil(responsabil);
         comment.setDate(LocalDate.now());
 
-        commentRepo.save(comment);
-        return "Comentariul a fost adăugat cu succes.";
+        return commentRepo.save(comment);
     }
 }
 
