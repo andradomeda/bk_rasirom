@@ -4,6 +4,12 @@ import com.example.rasirom.model.Task;
 import com.example.rasirom.repository.TaskRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+
 import java.util.List;
 import java.util.Optional;
 
@@ -46,5 +52,37 @@ public class TaskController {
         taskRepo.save(subtask);
 
         return "Subtask-ul a fost adăugat cu succes!";
+    }
+    @PatchMapping("/{id}")
+    public Task patchTask(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates
+    ) {
+        Task task = taskRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Task-ul cu id-ul " + id + " nu a fost găsit."
+                ));
+
+        updates.forEach((field, value) -> {
+            switch (field) {
+                case "titlu":
+                    task.setTitlu((String) value);
+                    break;
+                case "descriere":
+                    task.setDescriere((String) value);
+                    break;
+                case "dueDate":
+                    // value vine ca String "YYYY-MM-DD"
+                    task.setDueDate(LocalDate.parse((String) value));
+                    break;
+                default:
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Câmp necunoscut sau neupdatabil: " + field
+                    );
+            }
+        });
+
+        return taskRepo.save(task);
     }
 }
