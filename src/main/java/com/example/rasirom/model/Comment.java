@@ -1,6 +1,5 @@
 package com.example.rasirom.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -8,30 +7,41 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "comment")
 public class Comment {
+
+    // ID-ul unic al comentariului, generat automat
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
 
-    // Nu serializăm relația inversă către task
+    // Relația cu taskul asociat comentariului (obligatorie)
+    // @JsonIgnore previne serializarea recursivă în JSON
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_task", nullable = false)
     @JsonIgnore
     private Task task;
 
-    // Nu vrem să afișăm responsabilul
+    // Relația cu responsabilul care a făcut comentariul (obligatorie)
+    // @JsonIgnore pentru a nu expune datele responsabilului în JSON
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_responsabil", nullable = false)
     @JsonIgnore
     private Responsabil responsabil;
 
+    // Conținutul efectiv al comentariului (obligatoriu)
     @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
 
-    // Nu vrem să afișăm data
+    // Data la care a fost adăugat comentariul
     @Column(nullable = false)
     private LocalDate date;
 
-    // Constructori, Getters & Setters
+    // Constructori, Getteri și Setteri
+    public Comment(Task task, Responsabil responsabil, String text, LocalDate date) {
+        this.task = task;
+        this.responsabil = responsabil;
+        this.text = text;
+        this.date = date;
+    }
 
     public Long getCommentId() {
         return commentId;

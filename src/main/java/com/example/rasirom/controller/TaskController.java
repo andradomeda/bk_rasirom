@@ -9,38 +9,35 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
-import java.util.Map;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/tasks")
+@RequestMapping("/tasks") // Prefix comun pentru toate rutele
 public class TaskController {
 
     private final TaskRepository taskRepo;
 
+    // Constructor pentru repository-ul de Task-uri
     public TaskController(TaskRepository taskRepo) {
         this.taskRepo = taskRepo;
     }
 
+    //returneaza toate taskurile
     @GetMapping
     public List<Task> getAllTasks() {
         return taskRepo.findAll();
     }
 
+    //adauga un task
     @PostMapping
     public Task addTask(@RequestBody Task task) {
         return taskRepo.save(task);
     }
 
-    // Endpoint pentru adăugarea unui subtask la un task existent
+    //adauga subtask
     @PostMapping("/{id}/subtasks")
     public String addSubtask(@PathVariable Long id, @RequestBody Task subtask) {
-        // Căutăm task-ul cu id-ul dat
         Optional<Task> taskOpt = taskRepo.findById(id);
 
         if (taskOpt.isEmpty()) {
@@ -48,15 +45,15 @@ public class TaskController {
         }
 
         Task parentTask = taskOpt.get();
-
-        // Asociem subtask-ul la task-ul părinte
         subtask.setParent(parentTask);
-
-        // Salvăm subtask-ul
         taskRepo.save(subtask);
 
         return "Subtask-ul a fost adăugat cu succes!";
     }
+
+
+     // Actualizează parțial câmpurile unui task (PATCH).
+     //Suportă modificarea titlului, descrierii și datei limită (dueDate).
     @PatchMapping("/{id}")
     public Task patchTask(
             @PathVariable Long id,
@@ -67,6 +64,7 @@ public class TaskController {
                         HttpStatus.NOT_FOUND, "Task-ul cu id-ul " + id + " nu a fost găsit."
                 ));
 
+        // Iterăm prin câmpurile trimise și le actualizăm
         updates.forEach((field, value) -> {
             switch (field) {
                 case "titlu":
@@ -76,7 +74,6 @@ public class TaskController {
                     task.setDescriere((String) value);
                     break;
                 case "dueDate":
-                    // value vine ca String "YYYY-MM-DD"
                     task.setDueDate(LocalDate.parse((String) value));
                     break;
                 default:
@@ -89,6 +86,8 @@ public class TaskController {
 
         return taskRepo.save(task);
     }
+
+    //returneaza task in functie de id
     @GetMapping("/{id}")
     public Task getTaskById(@PathVariable Long id) {
         return taskRepo.findById(id)
@@ -97,6 +96,10 @@ public class TaskController {
                         "Task-ul cu id-ul " + id + " nu a fost găsit."
                 ));
     }
+
+
+     //Filtrare tasks după data limită (due date).
+     // Acceptă un string de tip "today" sau o dată exactă (YYYY-MM-DD).
 
     @GetMapping(params = "due_date")
     public List<Task> getTasksByDueDate(@RequestParam("due_date") String dueDate) {
@@ -109,6 +112,7 @@ public class TaskController {
         return taskRepo.findByDueDate(date);
     }
 
+     //Filtrare după id responsabil.
     @GetMapping(params = "responsabil")
     public List<Task> getTasksByResponsabil(@RequestParam("responsabil") Long responsabilId) {
         return taskRepo.findByResponsabil_Id(responsabilId);

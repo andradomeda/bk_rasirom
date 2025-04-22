@@ -1,6 +1,5 @@
 package com.example.rasirom.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -10,26 +9,29 @@ import java.util.List;
 
 @Entity
 @Table(name = "responsabil")
-@JsonIgnoreProperties("taskuri")
+@JsonIgnoreProperties("taskuri") // Evită problemele de serializare recursivă
 public class Responsabil {
+
+    // Identificatorul unic al responsabilului, generat automat
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Numele responsabilului (obligatoriu)
     @Column(nullable = false)
     private String nume;
 
+    // Adresa de email a responsabilului (obligatorie și unică)
     @Column(nullable = false, unique = true)
     private String email;
 
+    // Lista de taskuri asociate responsabilului
+    // JsonManagedReference previne bucla infinită la serializare
     @OneToMany(mappedBy = "responsabil", cascade = CascadeType.ALL)
-    @JsonManagedReference  // Evită loop-ul la serializare
+    @JsonManagedReference
     private List<Task> taskuri = new ArrayList<>();
 
-
-
-    // Constructori, Getters & Setters
-
+    // Constructori
     public Responsabil() {}
 
     public Responsabil(String nume, String email, List<Task> taskuri) {
@@ -38,6 +40,7 @@ public class Responsabil {
         this.taskuri = taskuri;
     }
 
+    // Getteri și setteri
     public Long getId() {
         return id;
     }

@@ -12,37 +12,49 @@ import java.util.List;
 @Entity
 @Table(name = "task")
 public class Task {
+
+    // Identificatorul unic pentru fiecare task, generat automat
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Titlul taskului, nu poate fi null, max 200 caractere
     @Column(nullable = false, length = 200)
     private String titlu;
 
+    // Descrierea detaliată a taskului
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descriere;
 
+    // Data limită pentru finalizarea taskului (poate fi null)
     private LocalDate dueDate;
 
+    // Relația ManyToOne cu entitatea Responsabil – un task are un responsabil
+    // JsonBackReference evită serializarea recursivă în JSON
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responsabil_id", nullable = false)
-    @JsonBackReference  // Evită serializarea recursivă a responsabilului
+    @JsonBackReference
     private Responsabil responsabil;
 
+    // Relație ManyToOne pentru taskul părinte, în cazul în care acest task este subtask
+    // JsonIgnore evită serializarea părintelui pentru a preveni loop-uri
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    @JsonIgnore  // Evită serializarea recursivă a părinților taskurilor
+    @JsonIgnore
     private Task parent;
 
+    // Relație OneToMany pentru lista de subtasks care aparțin acestui task
+    // JsonManagedReference este folosit pentru a permite serializarea corectă în JSON
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    @JsonManagedReference  // Evită loop-ul la serializare pentru subtasks
+    @JsonManagedReference
     private List<Task> subtasks = new ArrayList<>();
 
+    // Comentariile asociate taskului – se șterg automat dacă taskul este șters
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference  // Evită loop-ul la serializare pentru comments
+    @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
-    // Constructori, Getters & Setters
 
+    // Constructori
     public Task() {}
 
     public Task(String titlu, String descriere, LocalDate dueDate, Responsabil responsabil, Task parent) {
@@ -53,7 +65,7 @@ public class Task {
         this.parent = parent;
     }
 
-    // Getters & Setters
+    // Getteri și setteri
     public Long getId() {
         return id;
     }
