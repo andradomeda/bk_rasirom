@@ -9,6 +9,10 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -84,5 +88,29 @@ public class TaskController {
         });
 
         return taskRepo.save(task);
+    }
+    @GetMapping("/{id}")
+    public Task getTaskById(@PathVariable Long id) {
+        return taskRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Task-ul cu id-ul " + id + " nu a fost găsit."
+                ));
+    }
+
+    @GetMapping(params = "due_date")
+    public List<Task> getTasksByDueDate(@RequestParam("due_date") String dueDate) {
+        LocalDate date;
+        if ("today".equalsIgnoreCase(dueDate)) {
+            date = LocalDate.now();
+        } else {
+            date = LocalDate.parse(dueDate);
+        }
+        return taskRepo.findByDueDate(date);
+    }
+
+    @GetMapping(params = "responsabil")
+    public List<Task> getTasksByResponsabil(@RequestParam("responsabil") Long responsabilId) {
+        return taskRepo.findByResponsabil_Id(responsabilId);
     }
 }

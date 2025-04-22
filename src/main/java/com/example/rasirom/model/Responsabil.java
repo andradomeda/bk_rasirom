@@ -1,5 +1,7 @@
 package com.example.rasirom.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -8,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "responsabil")
+@JsonIgnoreProperties("taskuri")
 public class Responsabil {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +25,8 @@ public class Responsabil {
     @OneToMany(mappedBy = "responsabil", cascade = CascadeType.ALL)
     @JsonManagedReference  // Evită loop-ul la serializare
     private List<Task> taskuri = new ArrayList<>();
+
+
 
     // Constructori, Getters & Setters
 
