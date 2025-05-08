@@ -33,25 +33,41 @@ public class Task {
     // JsonBackReference evită serializarea recursivă în JSON
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responsabil_id", nullable = false)
+<<<<<<< HEAD
     @JsonBackReference
+=======
+    @JsonBackReference("task-responsabil")
+>>>>>>> e37e565 (reparare bugs rute)
     private Responsabil responsabil;
 
     // Relație ManyToOne pentru taskul părinte, în cazul în care acest task este subtask
     // JsonIgnore evită serializarea părintelui pentru a preveni loop-uri
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+<<<<<<< HEAD
     @JsonIgnore
+=======
+    @JsonBackReference("task-subtask")
+>>>>>>> e37e565 (reparare bugs rute)
     private Task parent;
 
     // Relație OneToMany pentru lista de subtasks care aparțin acestui task
     // JsonManagedReference este folosit pentru a permite serializarea corectă în JSON
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+<<<<<<< HEAD
     @JsonManagedReference
+=======
+    @JsonManagedReference("task-subtask")
+>>>>>>> e37e565 (reparare bugs rute)
     private List<Task> subtasks = new ArrayList<>();
 
     // Comentariile asociate taskului – se șterg automat dacă taskul este șters
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+<<<<<<< HEAD
     @JsonManagedReference
+=======
+    @JsonManagedReference("task-comment")
+>>>>>>> e37e565 (reparare bugs rute)
     private List<Comment> comments = new ArrayList<>();
 
     // Constructori

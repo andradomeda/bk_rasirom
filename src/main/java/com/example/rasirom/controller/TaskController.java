@@ -30,7 +30,9 @@ public class TaskController {
     }
 
     //adauga un task
-    @PostMapping
+
+    @PostMapping(consumes = "application/json")
+
     public Task addTask(@RequestBody Task task) {
         return taskRepo.save(task);
     }
@@ -97,24 +99,18 @@ public class TaskController {
                 ));
     }
 
-
-     //Filtrare tasks după data limită (due date).
-     // Acceptă un string de tip "today" sau o dată exactă (YYYY-MM-DD).
-
-    @GetMapping(params = "due_date")
-    public List<Task> getTasksByDueDate(@RequestParam("due_date") String dueDate) {
-        LocalDate date;
-        if ("today".equalsIgnoreCase(dueDate)) {
-            date = LocalDate.now();
-        } else {
-            date = LocalDate.parse(dueDate);
+    @GetMapping("/search")
+    public List<Task> searchTasks(
+            @RequestParam(required = false) String titlu,
+            @RequestParam(required = false) String descriere,
+            @RequestParam(required = false) String dueDate,
+            @RequestParam(required = false) Long responsabilId
+    ) {
+        LocalDate parsedDate = null;
+        if (dueDate != null && !dueDate.isBlank()) {
+            parsedDate = LocalDate.parse(dueDate);
         }
-        return taskRepo.findByDueDate(date);
+        return taskRepo.searchTasks(titlu, descriere, parsedDate, responsabilId);
     }
 
-     //Filtrare după id responsabil.
-    @GetMapping(params = "responsabil")
-    public List<Task> getTasksByResponsabil(@RequestParam("responsabil") Long responsabilId) {
-        return taskRepo.findByResponsabil_Id(responsabilId);
-    }
 }
