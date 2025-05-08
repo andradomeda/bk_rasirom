@@ -1,5 +1,6 @@
 package com.example.rasirom.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -17,14 +18,14 @@ public class Comment {
     // @JsonIgnore previne serializarea recursivă în JSON
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_task", nullable = false)
-    @JsonIgnore
+    @JsonBackReference("task-comment")
     private Task task;
 
     // Relația cu responsabilul care a făcut comentariul (obligatorie)
     // @JsonIgnore pentru a nu expune datele responsabilului în JSON
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_responsabil", nullable = false)
-    @JsonIgnore
+    @JsonBackReference("responsabil-comments")
     private Responsabil responsabil;
 
     // Conținutul efectiv al comentariului (obligatoriu)
@@ -42,6 +43,8 @@ public class Comment {
         this.text = text;
         this.date = date;
     }
+
+    public Comment() {}
 
     public Long getCommentId() {
         return commentId;

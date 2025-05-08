@@ -1,14 +1,11 @@
 package com.example.rasirom.controller;
-
 import com.example.rasirom.model.Task;
 import com.example.rasirom.repository.TaskRepository;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -17,12 +14,10 @@ import java.util.Optional;
 public class TaskController {
 
     private final TaskRepository taskRepo;
-
     // Constructor pentru repository-ul de Task-uri
     public TaskController(TaskRepository taskRepo) {
         this.taskRepo = taskRepo;
     }
-
     //returneaza toate taskurile
     @GetMapping
     public List<Task> getAllTasks() {
@@ -30,7 +25,8 @@ public class TaskController {
     }
 
     //adauga un task
-    @PostMapping
+    @PostMapping(consumes = "application/json")
+
     public Task addTask(@RequestBody Task task) {
         return taskRepo.save(task);
     }
@@ -52,8 +48,8 @@ public class TaskController {
     }
 
 
-     // Actualizează parțial câmpurile unui task (PATCH).
-     //Suportă modificarea titlului, descrierii și datei limită (dueDate).
+    // Actualizează parțial câmpurile unui task (PATCH).
+    //Suportă modificarea titlului, descrierii și datei limită (dueDate).
     @PatchMapping("/{id}")
     public Task patchTask(
             @PathVariable Long id,
@@ -97,24 +93,18 @@ public class TaskController {
                 ));
     }
 
-
-     //Filtrare tasks după data limită (due date).
-     // Acceptă un string de tip "today" sau o dată exactă (YYYY-MM-DD).
-
-    @GetMapping(params = "due_date")
-    public List<Task> getTasksByDueDate(@RequestParam("due_date") String dueDate) {
-        LocalDate date;
-        if ("today".equalsIgnoreCase(dueDate)) {
-            date = LocalDate.now();
-        } else {
-            date = LocalDate.parse(dueDate);
+    @GetMapping("/search")
+    public List<Task> searchTasks(
+            @RequestParam(required = false) String titlu,
+            @RequestParam(required = false) String descriere,
+            @RequestParam(required = false) String dueDate,
+            @RequestParam(required = false) Long responsabilId
+    ) {
+        LocalDate parsedDate = null;
+        if (dueDate != null && !dueDate.isBlank()) {
+            parsedDate = LocalDate.parse(dueDate);
         }
-        return taskRepo.findByDueDate(date);
+        return taskRepo.searchTasks(titlu, descriere, parsedDate, responsabilId);
     }
 
-     //Filtrare după id responsabil.
-    @GetMapping(params = "responsabil")
-    public List<Task> getTasksByResponsabil(@RequestParam("responsabil") Long responsabilId) {
-        return taskRepo.findByResponsabil_Id(responsabilId);
-    }
 }

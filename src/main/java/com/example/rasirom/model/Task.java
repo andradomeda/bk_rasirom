@@ -1,10 +1,7 @@
 package com.example.rasirom.model;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,25 +30,25 @@ public class Task {
     // JsonBackReference evită serializarea recursivă în JSON
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responsabil_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("task-responsabil")
     private Responsabil responsabil;
 
     // Relație ManyToOne pentru taskul părinte, în cazul în care acest task este subtask
     // JsonIgnore evită serializarea părintelui pentru a preveni loop-uri
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    @JsonIgnore
+    @JsonBackReference("task-subtask")
     private Task parent;
 
     // Relație OneToMany pentru lista de subtasks care aparțin acestui task
     // JsonManagedReference este folosit pentru a permite serializarea corectă în JSON
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference("task-subtask")
     private List<Task> subtasks = new ArrayList<>();
 
     // Comentariile asociate taskului – se șterg automat dacă taskul este șters
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("task-comment")
     private List<Comment> comments = new ArrayList<>();
 
     // Constructori
